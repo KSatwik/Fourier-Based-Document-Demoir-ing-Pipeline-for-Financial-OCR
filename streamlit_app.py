@@ -1,5 +1,5 @@
 """
-Streamlit — Fourier-Based Document Demoiréing for Financial OCR.
+Streamlit demo — Fourier-Based Document Demoiréing for Financial OCR
 """
 
 import io
@@ -15,11 +15,12 @@ from dataclasses import dataclass
 
 @dataclass
 class DemoireConfig:
-    notch_sigma: float = 4.0
-    num_notches: int = 15
-    dc_exclusion_radius: int = 25
-    peak_percentile: float = 99.0
-    nms_radius: int = 12
+    notch_sigma: float = 3.0            # tighter notches
+    num_notches: int = 6                # fewer notches
+    dc_exclusion_radius: int = 50       # wider DC exclusion
+    axis_exclusion_width: int = 15      # NEW: ignore peaks near axes
+    peak_percentile: float = 99.5       # stricter threshold
+    nms_radius: int = 15
     bilateral_d: int = 7
     bilateral_sigma_color: float = 40.0
     bilateral_sigma_space: float = 40.0
@@ -70,8 +71,18 @@ def detect_noise_peaks(log_mag, cfg):
     cy, cx = h // 2, w // 2
     Y, X = np.ogrid[:h, :w]
     dist_sq = (Y - cy) ** 2 + (X - cx) ** 2
+
     masked = log_mag.copy()
+
+    # ---- FIX 1: wider circular exclusion around DC ----
     masked[dist_sq < cfg.dc_exclusion_radius ** 2] = 0.0
+
+    # ---- FIX 2: exclude peaks near the central row/column ----
+    # These correspond to text-line structure, NOT moiré.
+    axis = cfg.axis_exclusion_width
+    masked[np.abs(Y - cy) < axis, :] = 0.0
+    masked[:, np.abs(X - cx) < axis] = 0.0
+
     lm = _local_maxima_mask(masked, radius=cfg.nms_radius)
     positives = masked[masked > 0]
     if positives.size == 0:
@@ -82,6 +93,7 @@ def detect_noise_peaks(log_mag, cfg):
         return []
     vals = masked[cand[:, 0], cand[:, 1]]
     cand = cand[np.argsort(vals)[::-1]]
+
     peaks = []
     nms_sq = cfg.nms_radius ** 2
     for y, x in cand:
@@ -149,7 +161,7 @@ def demoire_pipeline(bgr, cfg):
     }
 
 
-# ---------------- Streamlit UI ---------------- #
+# ===================== Streamlit UI ===================== #
 st.set_page_config(page_title="Fourier Demoiréing for OCR",
                    page_icon="🔬", layout="wide")
 
@@ -162,11 +174,15 @@ st.markdown(
 
 with st.sidebar:
     st.header("⚙ Parameters")
-    notch_sigma = st.slider("Notch σ (pixels)", 1.0, 12.0, 4.0, 0.5)
-    num_notches = st.slider("Max notch pairs", 1, 40, 15)
-    dc_radius = st.slider("DC exclusion radius", 5, 80, 25)
-    percentile = st.slider("Peak percentile", 90.0, 99.9, 99.0, 0.1)
-    nms_radius = st.slider("NMS radius", 3, 30, 12)
+    notch_sigma = st.slider("Notch σ (pixels)", 1.0, 12.0, 3.0, 0.5)
+    num_notches = st.slider("Max notch pairs", 1, 40, 6)
+    dc_radius = st.slider("DC exclusion radius", 10, 120, 50)
+    axis_width = st.slider("Axis exclusion width", 0, 60, 15,
+                           help="Ignore peaks within this many pixels of "
+                                "the central row/column. Those correspond "
+                                "to text structure, not moiré.")
+    percentile = st.slider("Peak percentile", 90.0, 99.9, 99.5, 0.1)
+    nms_radius = st.slider("NMS radius", 3, 30, 15)
     bilateral_d = st.slider("Bilateral diameter", 3, 15, 7, 2)
     adaptive_block = st.slider("Adaptive block size", 11, 71, 31, 2)
     adaptive_C = st.slider("Adaptive C", 2.0, 30.0, 10.0, 0.5)
@@ -195,10 +211,11 @@ if uploaded is None and st.session_state["bgr"] is None:
             lw = int(rng.integers(250, w - 150))
             cv2.rectangle(canvas, (70, y), (70 + lw, y + 9), 25, -1)
             y += int(rng.integers(22, 38))
+        # stronger, clearly off-axis moiré grating
         yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
-        g = (np.sin(2 * np.pi * (xx / 6.5 + yy / 42.0))
-             + np.sin(2 * np.pi * (yy / 7.5 - xx / 58.0)))
-        noisy = np.clip(canvas.astype(np.float32) + 28.0 * g, 0, 255).astype(np.uint8)
+        g = (np.sin(2 * np.pi * (xx / 13.0 + yy / 21.0))
+             + np.sin(2 * np.pi * (yy / 15.0 - xx / 27.0)))
+        noisy = np.clip(canvas.astype(np.float32) + 32.0 * g, 0, 255).astype(np.uint8)
         st.session_state["bgr"] = cv2.cvtColor(noisy, cv2.COLOR_GRAY2BGR)
         st.rerun()
 
@@ -208,6 +225,7 @@ if st.session_state["bgr"] is not None:
             notch_sigma=notch_sigma,
             num_notches=num_notches,
             dc_exclusion_radius=dc_radius,
+            axis_exclusion_width=axis_width,
             peak_percentile=percentile,
             nms_radius=nms_radius,
             bilateral_d=bilateral_d,
