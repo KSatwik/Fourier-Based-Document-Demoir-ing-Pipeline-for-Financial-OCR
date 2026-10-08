@@ -21,6 +21,8 @@ post-processes the image into a clean binary document ready for
 structural text extraction (Tesseract, PaddleOCR, LayoutLM).
 
 ---
+Application link - https://satwik-document-demoiring-financial-ocr.streamlit.app/
+---
 
 ## 🎯 Problem → Solution
 
@@ -39,7 +41,8 @@ structural text extraction (Tesseract, PaddleOCR, LayoutLM).
 
 ### Verification — 4-Panel Comparison
 
-![4-Panel Verification](results/04_verification_4panel.png)
+<img width="1440" height="855" alt="image" src="https://github.com/user-attachments/assets/8ad12ed9-29f5-4e02-9e48-35ce645577d9" />
+
 
 *Panel (a) original moiré image · (b) log-magnitude spectrum with detected
 peaks (red = detected, orange = conjugate-symmetric mirrors) · (c) notch-
@@ -47,9 +50,11 @@ filtered spatial reconstruction · (d) final binary ready for OCR.*
 
 ### Stage-by-Stage
 
-| Input (Moiré) | Filtered | Binary OCR-Ready |
-|:---:|:---:|:---:|
-| ![](results/01_input_moire.png) | ![](results/02_filtered_spatial.png) | ![](results/03_binary_ocr_ready.png) |
+
+<img width="1062" height="463" alt="image" src="https://github.com/user-attachments/assets/79302d77-656d-4cae-8cca-024b0022b4f4" />
+
+<img width="1017" height="431" alt="image" src="https://github.com/user-attachments/assets/b8f855f3-4725-431d-8a6f-727ee721f2ee" />
+
 
 ---
 
@@ -116,3 +121,22 @@ mask would introduce — crucial for preserving thin character strokes.
 git clone https://github.com/KSatwik/Fourier-Based-Document-Demoir-ing-Pipeline-for-Financial-OCR
 cd Fourier-Based-Document-Demoir-ing-Pipeline-for-Financial-OCR
 pip install -r requirements.txt
+```
+### 2. Sample Images
+
+Don't have a moiré document handy? Use this **Colab sample generator** to create realistic financial-document images replica (invoices, statements,tax forms) with configurable moiré interference — perfect for testing and demos.
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1eUddi-ZJtdsD8buPNE65GhNreZHOgXvj?usp=sharing)
+
+**The notebook lets you:**
+- Control moiré intensity, angle, and frequency
+- Adjust page size and text density
+- Download the generated PNG directly to your machine
+
+**Typical workflow:**
+
+1. Open the Colab notebook → adjust parameters → **Run all**
+2. Download `financial_doc_moire.png` from the Files panel
+3. Drag it into the live Streamlit demo, or run locally:
+   ```bash
+   python src/demoire.py --input financial_doc_moire.png
