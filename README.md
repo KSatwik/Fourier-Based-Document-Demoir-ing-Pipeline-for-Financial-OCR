@@ -1,0 +1,1 @@
+# Fourier-Based-Document-Demoir-ing-Pipeline-for-Financial-OCR
