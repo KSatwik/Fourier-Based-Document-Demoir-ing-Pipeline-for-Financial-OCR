@@ -21,7 +21,7 @@ post-processes the image into a clean binary document ready for
 structural text extraction (Tesseract, PaddleOCR, LayoutLM).
 
 ---
-Application link - https://satwik-document-demoiring-financial-ocr.streamlit.app/
+Application link - https://satwik-demoiring.streamlit.app/
 ---
 
 ## Problem → Solution
