@@ -80,8 +80,10 @@ def detect_noise_peaks(log_mag, cfg):
     # ---- FIX 2: exclude peaks near the central row/column ----
     # These correspond to text-line structure, NOT moiré.
     axis = cfg.axis_exclusion_width
-    masked[np.abs(Y - cy) < axis, :] = 0.0
-    masked[:, np.abs(X - cx) < axis] = 0.0
+    row_idx = np.abs(np.arange(h) - cy) < axis
+    col_idx = np.abs(np.arange(w) - cx) < axis
+    masked[row_idx, :] = 0.0
+    masked[:, col_idx] = 0.0
 
     lm = _local_maxima_mask(masked, radius=cfg.nms_radius)
     positives = masked[masked > 0]
