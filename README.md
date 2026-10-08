@@ -1,4 +1,4 @@
-# 🔬 Fourier-Based Document Demoiréing Pipeline for Financial OCR
+# Fourier-Based Document Demoiréing Pipeline for Financial OCR
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue)](https://python.org)
 [![OpenCV](https://img.shields.io/badge/OpenCV-4.x-green)](https://opencv.org)
@@ -10,7 +10,7 @@
 
 ---
 
-## 📖 Overview
+## Overview
 
 When a document is photographed off an LCD/LED monitor, the camera's
 sensor aliases with the screen's pixel grid, producing **periodic
@@ -24,7 +24,7 @@ structural text extraction (Tesseract, PaddleOCR, LayoutLM).
 Application link - https://satwik-document-demoiring-financial-ocr.streamlit.app/
 ---
 
-## 🎯 Problem → Solution
+## Problem → Solution
 
 | Stage | Input | Output |
 |-------|-------|--------|
@@ -37,7 +37,7 @@ Application link - https://satwik-document-demoiring-financial-ocr.streamlit.app
 
 ---
 
-## 🖼️ Results
+## Results
 
 ### Verification — 4-Panel Comparison
 
@@ -58,37 +58,26 @@ filtered spatial reconstruction · (d) final binary ready for OCR.*
 
 ---
 
-## ⚙️ Pipeline
-
-```text
-[ Raw Image with Moiré ]
-             │
-             ▼
-┌──────────────────────────┐
-│ 1. Frequency Demoiréing  │ ──► FFT ➔ Notch/Band-Stop Filtering ➔ IFFT
-└──────────────────────────┘
-             │
-             ▼
-┌──────────────────────────┐
-│ 2. Layout & Segmentation │ ──► Deskew, Binarization, ROI Detection
-└──────────────────────────┘
-             │
-             ▼
-┌──────────────────────────┐
-│  3. Multi-Engine OCR     │ ──► Hybrid Deep-Learning Text Extraction
-└──────────────────────────┘
-             │
-             ▼
-┌──────────────────────────┐
-│ 4. Semantic Validation   │ ──► Named Entity Recognition (NER) & Schema Rules
-└──────────────────────────┘
-             │
-             ▼
-  [ Verified JSON Payload ]
+## Pipeline
 ```
+Raw document
+     ↓
+FFT
+     ↓
+Moiré peak detection
+     ↓
+Gaussian notch filtering
+     ↓
+IFFT
+     ↓
+Adaptive binarization
+     ↓
+OCR-ready image
+```
+Planned - OCR → Layout analysis → NER → Structured financial data
 
 
-## 🧮 Theory in 60 Seconds
+## Theory in 60 Seconds
 
 A moiré pattern is a **periodic spatial interference** — in the Fourier
 domain it appears as **conjugate-symmetric spike pairs** away from DC.
@@ -108,8 +97,7 @@ $$
 where $D_k(u,v)$ is the Euclidean distance from $(u,v)$ to the $k$-th
 peak. Multiply `H` element-wise with the shifted FFT, then invert.
 
-The soft Gaussian profile avoids ringing artifacts that a hard binary
-mask would introduce — crucial for preserving thin character strokes.
+A soft Gaussian notch was used to reduce ringing; OCR accuracy was then compared against hard-mask filtering.
 
 ---
 
