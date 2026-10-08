@@ -97,7 +97,7 @@ Mathematically, for each detected peak $(u_k, v_k)$ and its mirror
 $(u'_k, v'_k)$:
 
 $$
-H(u,v) = \prod_k \left[ 1 - \exp\!\left(-\frac{D_k(u,v)^2}{2\sigma^2}\right)\right]
+H(u,v) = \prod_k \left[ 1 - \exp\left(-\frac{D_k(u,v)^2}{2\sigma^2}\right)\right]
 $$
 
 where $D_k(u,v)$ is the Euclidean distance from $(u,v)$ to the $k$-th
@@ -113,6 +113,6 @@ mask would introduce — crucial for preserving thin character strokes.
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/KSatwik/
-cd fourier-demoire-ocr
+git clone https://github.com/KSatwik/Fourier-Based-Document-Demoir-ing-Pipeline-for-Financial-OCR
+cd Fourier-Based-Document-Demoir-ing-Pipeline-for-Financial-OCR
 pip install -r requirements.txt
